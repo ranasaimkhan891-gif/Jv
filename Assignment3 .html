@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Assignment 3 — Saim Sajjad</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C86A;
+    --gold-pale: #F5E4A8;
+    --gold-dim: #8A6E2F;
+    --crimson: #8B1A1A;
+    --crimson-bright: #C0392B;
+    --dark: #0A0804;
+    --dark-2: #110E06;
+    --dark-3: #1A1508;
+    --dark-4: #221C0A;
+    --dark-5: #2E2510;
+    --text: #EDE0C0;
+    --text-dim: #A89060;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, #2A1F05 0%, var(--dark) 70%);
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(201,168,76,0.04) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(201,168,76,0.04) 60px);
+  }
+
+  .hero-deco-top {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--gold));
+    animation: grow-line 1.2s ease forwards;
+  }
+
+  .hero-deco-bottom {
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 80px;
+    background: linear-gradient(to top, transparent, var(--gold));
+  }
+
+  @keyframes grow-line {
+    from { height: 0; } to { height: 80px; }
+  }
+
+  .hero-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.3s ease forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--gold-pale) 0%, var(--gold) 50%, var(--gold-dim) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    animation: fade-up 0.8s 0.5s ease forwards;
+  }
+
+  .hero-sub {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-style: italic;
+    color: var(--gold-dim);
+    margin-top: 0.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.7s ease forwards;
+  }
+
+  .hero-divider {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 2rem auto;
+    opacity: 0;
+    animation: fade-up 0.8s 0.9s ease forwards;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fade-up 0.8s 1.1s ease forwards;
+  }
+
+  .meta-item {
+    text-align: center;
+  }
+
+  .meta-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .meta-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--gold-light);
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── NAV ─── */
+  .toc {
+    background: var(--dark-2);
+    border-top: 1px solid rgba(201,168,76,0.2);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 1rem 2rem;
+    display: flex;
+    gap: 0.5rem 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .toc a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .toc a:hover { color: var(--gold-light); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(201,168,76,0.12);
+    line-height: 1;
+    min-width: 70px;
+  }
+
+  .section-title-group h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1.1;
+  }
+
+  .section-title-group .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-top: 0.3rem;
+  }
+
+  /* ─── THEORY CARDS ─── */
+  .theory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5px;
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .theory-card {
+    background: var(--dark-3);
+    padding: 2rem;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .theory-card:hover {
+    background: var(--dark-4);
+  }
+
+  .theory-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--gold);
+    transition: height 0.4s ease;
+  }
+
+  .theory-card:hover::before { height: 100%; }
+
+  .theory-card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--gold-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  .theory-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  .theory-card p {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.65;
+  }
+
+  /* ─── TRACE TABLE ─── */
+  .trace-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-top: 1.5rem;
+  }
+
+  .trace-table th {
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    letter-spacing: 0.1em;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .trace-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid rgba(201,168,76,0.07);
+    color: var(--text-dim);
+    transition: background 0.2s;
+  }
+
+  .trace-table tr:hover td {
+    background: rgba(201,168,76,0.04);
+    color: var(--text);
+  }
+
+  .trace-table .op { color: var(--gold-light); }
+  .trace-table .state { color: #7ecf9a; font-size: 0.75rem; }
+  .trace-table .ret { color: var(--crimson-bright); }
+
+  /* ─── CODE BLOCK ─── */
+  .code-wrapper {
+    background: var(--dark-2);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-left: 3px solid var(--gold);
+    margin: 1.5rem 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    background: rgba(201,168,76,0.07);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+  }
+
+  .code-header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots i {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .code-dots i:nth-child(1) { background: #ff5f57; }
+  .code-dots i:nth-child(2) { background: #febc2e; }
+  .code-dots i:nth-child(3) { background: #28c840; }
+
+  pre {
+    padding: 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--text-dim);
+  }
+
+  .kw { color: #e06c75; }
+  .type { color: #e5c07b; }
+  .fn { color: #61afef; }
+  .str { color: #98c379; }
+  .cmt { color: #5c6370; font-style: italic; }
+  .num { color: #d19a66; }
+  .op-sym { color: var(--gold); }
+
+  /* ─── CONCEPT PILLS ─── */
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .pill:hover {
+    border-color: var(--gold);
+    color: var(--gold-light);
+    background: rgba(201,168,76,0.1);
+  }
+
+  .pill.red { border-color: rgba(139,26,26,0.5); color: #c0392b; background: rgba(139,26,26,0.08); }
+  .pill.green { border-color: rgba(46,125,50,0.5); color: #66bb6a; background: rgba(46,125,50,0.08); }
+
+  /* ─── ALGORITHM STEPS ─── */
+  .algo-steps {
+    counter-reset: step;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-left: 1px solid rgba(201,168,76,0.2);
+    margin-left: 1rem;
+    padding-left: 0;
+  }
+
+  .algo-steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 1rem 1.5rem 1rem 2.5rem;
+    border-bottom: 1px solid rgba(201,168,76,0.06);
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    transition: background 0.2s;
+  }
+
+  .algo-steps li:hover {
+    background: rgba(201,168,76,0.03);
+    color: var(--text);
+  }
+
+  .algo-steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: -1.5rem;
+    top: 50%; transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    background: var(--dark);
+    padding: 2px 6px;
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+
+  /* ─── COMPARISON TABLE ─── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+  }
+
+  .compare-table th {
+    padding: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    text-align: left;
+  }
+
+  .compare-table td {
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  .compare-table tr:hover td {
+    background: rgba(201,168,76,0.04);
+    color: var(--text);
+  }
+
+  .compare-table .feature {
+    color: var(--gold-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .adv { color: #66bb6a; font-size: 0.8rem; }
+  .dis { color: #e57373; font-size: 0.8rem; }
+
+  /* ─── INFOGRAPHIC: LIFO/FIFO ─── */
+  .visual-block {
+    background: var(--dark-3);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 2rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .visual-block::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.06);
+  }
+
+  .stack-visual {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 4px;
+    margin: 1rem auto;
+    width: fit-content;
+  }
+
+  .stack-item {
+    width: 180px;
+    padding: 0.6rem 1rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(201,168,76,0.25);
+    background: rgba(201,168,76,0.06);
+    color: var(--gold-light);
+    letter-spacing: 0.1em;
+    position: relative;
+    animation: slide-in 0.4s ease backwards;
+  }
+
+  .stack-item:nth-child(1) { animation-delay: 0.1s; }
+  .stack-item:nth-child(2) { animation-delay: 0.2s; }
+  .stack-item:nth-child(3) { animation-delay: 0.3s; }
+  .stack-item:nth-child(4) { animation-delay: 0.4s; }
+
+  .stack-item.top-item {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.15);
+    color: var(--gold-pale);
+  }
+
+  .stack-item.top-item::after {
+    content: '← TOP';
+    position: absolute;
+    right: -70px;
+    top: 50%; transform: translateY(-50%);
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+  }
+
+  .stack-base {
+    width: 200px;
+    height: 4px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin-bottom: 4px;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .queue-visual {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    overflow-x: auto;
+    padding: 1.5rem 0;
+    justify-content: center;
+  }
+
+  .queue-item {
+    min-width: 70px;
+    padding: 0.7rem 0.5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    border: 1px solid rgba(201,168,76,0.25);
+    background: rgba(201,168,76,0.06);
+    color: var(--gold-light);
+    position: relative;
+    animation: slide-in 0.4s ease backwards;
+  }
+
+  .queue-item:nth-child(1) { animation-delay: 0.1s; border-color: var(--gold); background: rgba(201,168,76,0.15); }
+  .queue-item:nth-child(2) { animation-delay: 0.2s; }
+  .queue-item:nth-child(3) { animation-delay: 0.3s; }
+  .queue-item:nth-child(4) { animation-delay: 0.4s; }
+  .queue-item:nth-child(5) { animation-delay: 0.5s; }
+
+  .queue-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-dim);
+    text-align: center;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .arrow-icon {
+    color: var(--gold-dim);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── POSTFIX DIAGRAM ─── */
+  .postfix-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: rgba(201,168,76,0.1);
+    margin-top: 1.5rem;
+  }
+
+  .postfix-step {
+    background: var(--dark-3);
+    padding: 1.2rem;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .postfix-step:hover { background: var(--dark-4); }
+
+  .pf-token {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .pf-action {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .pf-stack {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold-dim);
+    background: rgba(201,168,76,0.07);
+    padding: 0.25rem 0.5rem;
+    border: 1px solid rgba(201,168,76,0.15);
+  }
+
+  /* ─── DIVIDER ─── */
+  .gold-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent 0%, rgba(201,168,76,0.4) 20%, rgba(201,168,76,0.4) 80%, transparent 100%);
+    margin: 0;
+  }
+
+  .ornament {
+    text-align: center;
+    padding: 1.5rem;
+    color: rgba(201,168,76,0.3);
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+  }
+
+  /* ─── CIRCULAR QUEUE ─── */
+  .circular-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .circular-ring {
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+
+  .cq-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cq-center-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--gold-dim);
+  }
+
+  .cq-cell {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: var(--dark-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold-dim);
+    transform-origin: 130px 130px;
+    transition: all 0.3s;
+  }
+
+  .cq-cell:hover {
+    background: rgba(201,168,76,0.15);
+    color: var(--gold-light);
+    border-color: var(--gold);
+  }
+
+  .cq-cell:nth-child(1) { top: 5px; left: 105px; }
+  .cq-cell:nth-child(2) { top: 55px; left: 210px; }
+  .cq-cell:nth-child(3) { top: 160px; left: 210px; }
+  .cq-cell:nth-child(4) { top: 210px; left: 105px; }
+  .cq-cell:nth-child(5) { top: 160px; left: 0px; }
+  .cq-cell:nth-child(6) { top: 55px; left: 0px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--dark-2);
+    border-top: 1px solid rgba(201,168,76,0.15);
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-pale), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+
+  footer a {
+    color: var(--gold-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  footer a:hover { color: var(--gold-light); }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    background: rgba(201,168,76,0.06);
+    border-left: 3px solid var(--gold);
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    color: var(--text-dim);
+  }
+
+  .callout strong {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ─── COMPLEXITY BADGE ─── */
+  .complexity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid rgba(201,168,76,0.4);
+    background: rgba(201,168,76,0.08);
+    color: var(--gold);
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .theory-grid { grid-template-columns: 1fr; }
+    .compare-table { font-size: 0.8rem; }
+    .compare-table th, .compare-table td { padding: 0.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <div class="hero-deco-top"></div>
+  <p class="hero-badge">Data Structures &amp; Algorithms · Assignment III</p>
+  <h1>Stacks &amp; Queues</h1>
+  <p class="hero-sub">A Visual Reference Guide</p>
+  <div class="hero-divider"></div>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Student</span>
+      <span class="meta-value">Saim Sajjad</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Student ID</span>
+      <span class="meta-value">s2025376095</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Topics</span>
+      <span class="meta-value">6 Questions</span>
+    </div>
+  </div>
+  <div class="hero-deco-bottom"></div>
+</header>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav class="toc">
+  <a href="#q1">Q1 · Stack Theory</a>
+  <a href="#q2">Q2 · Implementation</a>
+  <a href="#q3">Q3 · Brackets</a>
+  <a href="#q4">Q4 · Queue Theory</a>
+  <a href="#q5">Q5 · Queue Impl.</a>
+  <a href="#q6">Q6 · Postfix</a>
+</nav>
+
+<hr class="gold-divider">
+
+<!-- ══════════════ Q1 STACK THEORY ══════════════ -->
+<section id="q1" class="section">
+  <div class="section-header reveal">
+    <div class="section-num">01</div>
+    <div class="section-title-group">
+      <h2>Stack Theory</h2>
+      <p class="subtitle">Principles · Operations · Trade-offs</p>
+    </div>
+  </div>
+
+  <!-- Visual Stack -->
+  <div class="visual-block reveal">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.25em;color:var(--gold-dim);margin-bottom:1rem;text-transform:uppercase;">Stack State After push(10), push(20), push(5)</p>
+    <div style="display:flex;gap:4rem;flex-wrap:wrap;justify-content:center;align-items:flex-end;">
+      <div>
+        <div class="stack-visual">
+          <div class="stack-item top-item">5</div>
+          <div class="stack-item">20</div>
+          <div class="stack-item">10</div>
+          <div class="stack-base"></div>
+        </div>
+      </div>
+      <div style="max-width:320px;">
+        <div class="pill-row">
+          <span class="pill">LIFO Principle</span>
+          <span class="pill green">O(1) all ops</span>
+          <span class="pill red">Fixed size (array)</span>
+        </div>
+        <p style="font-size:0.9rem;color:var(--text-dim);line-height:1.8;">A stack operates on the <strong style="color:var(--gold)">Last In, First Out</strong> principle. The most recently pushed element is always the first to be removed. Every core operation works directly on the <em>top pointer</em>, making all of them constant time.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theory Cards -->
+  <div class="theory-grid reveal">
+    <div class="theory-card">
+      <div class="theory-card-num">Q1.1 — Definition</div>
+      <h3>What is a Stack?</h3>
+      <p>A linear structure where insertion and deletion occur only at one end — the <em>top</em>. Follows LIFO: the last item pushed is the first to be popped. Real-world analogies: a stack of plates, browser back-button history, undo in text editors.</p>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-num">Q1.2 — Core Operations</div>
+      <h3>Push · Pop · Peek</h3>
+      <p><strong style="color:var(--gold)">Push</strong> adds to the top. <strong style="color:var(--gold)">Pop</strong> removes from the top. <strong style="color:var(--gold)">Peek</strong> reads the top without removing. <strong style="color:var(--gold)">isEmpty</strong> checks for an empty stack. All run in <em>O(1)</em> time — they only touch the top pointer.</p>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-num">Q1.3 — Error States</div>
+      <h3>Overflow &amp; Underflow</h3>
+      <p><strong style="color:var(--crimson-bright)">Stack Overflow</strong> — pushing onto a full stack. Occurs during <em>push</em>. <strong style="color:var(--crimson-bright)">Stack Underflow</strong> — popping from an empty stack. Occurs during <em>pop</em>. Robust code must handle both gracefully with error messages.</p>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-num">Q1.4 — Implementation</div>
+      <h3>Array vs Linked List</h3>
+      <p><strong style="color:var(--gold)">Array:</strong> Fixed memory, cache-friendly, fast. Cannot resize after declaration. <strong style="color:var(--gold)">Linked List:</strong> Dynamic growth, no size limit, but each node carries an extra pointer overhead. Arrays are faster; linked lists are more flexible.</p>
+    </div>
+  </div>
+
+  <!-- Trace Table Q1.5 -->
+  <div class="reveal" style="margin-top:3rem;">
+    <h3 style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-style:italic;">Q1.5 — Operation Trace</h3>
+    <table class="trace-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Operation</th><th>Stack State</th><th>Return</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td class="op">push(10)</td><td class="state">[10]</td><td>—</td></tr>
+        <tr><td>2</td><td class="op">push(20)</td><td class="state">[10, 20]</td><td>—</td></tr>
+        <tr><td>3</td><td class="op">push(5)</td><td class="state">[10, 20, 5]</td><td>—</td></tr>
+        <tr><td>4</td><td class="op">pop()</td><td class="state">[10, 20]</td><td class="ret">5</td></tr>
+        <tr><td>5</td><td class="op">peek()</td><td class="state">[10, 20]</td><td class="ret">20</td></tr>
+        <tr><td>6</td><td class="op">push(30)</td><td class="state">[10, 20, 30]</td><td>—</td></tr>
+        <tr><td>7</td><td class="op">pop()</td><td class="state">[10, 20]</td><td class="ret">30</td></tr>
+        <tr><td>8</td><td class="op">pop()</td><td class="state">[10]</td><td class="ret">20</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="gold-divider"><div class="ornament">✦ ✦ ✦</div><hr class="gold-divider">
+
+<!-- ══════════════ Q2 IMPLEMENTATION ══════════════ -->
+<section id="q2" class="section">
+  <div class="section-header reveal">
+    <div class="section-num">02</div>
+    <div class="section-title-group">
+      <h2>Stack Implementation</h2>
+      <p class="subtitle">Array-based &amp; Linked-list-based in C++</p>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <div class="pill-row">
+      <span class="complexity">push → O(1)</span>
+      <span class="complexity">pop → O(1)</span>
+      <span class="complexity">peek → O(1)</span>
+      <span class="complexity">display → O(n)</span>
+    </div>
+  </div>
+
+  <div class="code-wrapper reveal">
+    <div class="code-header">
+      <div class="code-dots"><i></i><i></i><i></i></div>
+      <span>Array Stack — C++</span>
+    </div>
+    <pre><span class="kw">class</span> <span class="type">Stack</span> {
+  <span class="type">int</span> arr[<span class="num">10</span>];
+  <span class="type">int</span> top;
+<span class="kw">public</span>:
+  Stack() { top <span class="op-sym">=</span> <span class="op-sym">-</span><span class="num">1</span>; }
+
+  <span class="type">bool</span> <span class="fn">isEmpty</span>() { <span class="kw">return</span> top <span class="op-sym">==</span> <span class="op-sym">-</span><span class="num">1</span>; }
+  <span class="type">bool</span> <span class="fn">isFull</span>()  { <span class="kw">return</span> top <span class="op-sym">==</span> <span class="num">9</span>; }
+
+  <span class="type">void</span> <span class="fn">push</span>(<span class="type">int</span> val) {
+    <span class="kw">if</span> (<span class="fn">isFull</span>()) { cout <span class="op-sym">&lt;&lt;</span> <span class="str">"Stack Overflow"</span>; <span class="kw">return</span>; }
+    arr[<span class="op-sym">++</span>top] <span class="op-sym">=</span> val;
+  }
+
+  <span class="type">int</span> <span class="fn">pop</span>() {
+    <span class="kw">if</span> (<span class="fn">isEmpty</span>()) { cout <span class="op-sym">&lt;&lt;</span> <span class="str">"Stack Underflow"</span>; <span class="kw">return</span> <span class="op-sym">-</span><span class="num">1</span>; }
+    <span class="kw">return</span> arr[top<span class="op-sym">--</span>];
+  }
+
+  <span class="type">int</span> <span class="fn">peek</span>() { <span class="kw">return</span> <span class="fn">isEmpty</span>() <span class="op-sym">?</span> <span class="op-sym">-</span><span class="num">1</span> : arr[top]; }
+};</pre>
+  </div>
+
+  <div class="code-wrapper reveal">
+    <div class="code-header">
+      <div class="code-dots"><i></i><i></i><i></i></div>
+      <span>Linked List Stack — C++</span>
+    </div>
+    <pre><span class="kw">class</span> <span class="type">StackLL</span> {
+  <span class="type">Node</span><span class="op-sym">*</span> top;
+<span class="kw">public</span>:
+  StackLL() { top <span class="op-sym">=</span> <span class="kw">NULL</span>; }
+
+  <span class="type">void</span> <span class="fn">push</span>(<span class="type">int</span> val) {
+    <span class="type">Node</span><span class="op-sym">*</span> newNode <span class="op-sym">=</span> <span class="kw">new</span> <span class="type">Node</span>(val);
+    newNode<span class="op-sym">-&gt;</span>next <span class="op-sym">=</span> top;   <span class="cmt">// point to old top</span>
+    top <span class="op-sym">=</span> newNode;           <span class="cmt">// update top</span>
+  }
+
+  <span class="type">int</span> <span class="fn">pop</span>() {
+    <span class="kw">if</span> (<span class="fn">isEmpty</span>()) <span class="kw">return</span> <span class="op-sym">-</span><span class="num">1</span>;
+    <span class="type">int</span> val <span class="op-sym">=</span> top<span class="op-sym">-&gt;</span>data;
+    <span class="type">Node</span><span class="op-sym">*</span> temp <span class="op-sym">=</span> top;
+    top <span class="op-sym">=</span> top<span class="op-sym">-&gt;</span>next;
+    <span class="kw">delete</span> temp;             <span class="cmt">// free memory</span>
+    <span class="kw">return</span> val;
+  }
+};</pre>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="reveal">
+    <h3 style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-style:italic;">Array vs Linked List — Side by Side</h3>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Array Stack</th>
+          <th>Linked List Stack</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="feature">Memory</td>
+          <td><span class="adv">✓ Compact, cache-friendly</span></td>
+          <td><span class="dis">✗ Extra pointer per node</span></td>
+        </tr>
+        <tr>
+          <td class="feature">Size</td>
+          <td><span class="dis">✗ Fixed at compile time</span></td>
+          <td><span class="adv">✓ Grows dynamically</span></td>
+        </tr>
+        <tr>
+          <td class="feature">Overflow risk</td>
+          <td><span class="dis">✗ Possible</span></td>
+          <td><span class="adv">✓ Only on heap exhaustion</span></td>
+        </tr>
+        <tr>
+          <td class="feature">Speed</td>
+          <td><span class="adv">✓ Slightly faster</span></td>
+          <td>Comparable</td>
+        </tr>
+        <tr>
+          <td class="feature">Implementation</td>
+          <td><span class="adv">✓ Simpler</span></td>
+          <td>Requires node class</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="gold-divider"><div class="ornament">✦ ✦ ✦</div><hr class="gold-divider">
+
+<!-- ══════════════ Q3 BALANCED BRACKETS ══════════════ -->
+<section id="q3" class="section">
+  <div class="section-header reveal">
+    <div class="section-num">03</div>
+    <div class="section-title-group">
+      <h2>Balanced Brackets Checker</h2>
+      <p class="subtitle">Stack Application · O(n) Time · O(n) Space</p>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <strong>Algorithm:</strong> Traverse the expression left to right. Push opening brackets onto the stack. For each closing bracket, check if it matches the stack's top. If yes, pop it. If at the end the stack is empty — the expression is balanced.
+  </div>
+
+  <div class="visual-block reveal">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.25em;color:var(--gold-dim);margin-bottom:1.5rem;text-transform:uppercase;">Trace: { ( [ ] ) }</p>
+    <div style="overflow-x:auto;">
+      <table class="trace-table">
+        <thead>
+          <tr><th>Char</th><th>Action</th><th>Stack</th><th>Valid?</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="op">{</td><td>Push</td><td class="state">[ { ]</td><td class="adv">✓</td></tr>
+          <tr><td class="op">(</td><td>Push</td><td class="state">[ {, ( ]</td><td class="adv">✓</td></tr>
+          <tr><td class="op">[</td><td>Push</td><td class="state">[ {, (, [ ]</td><td class="adv">✓</td></tr>
+          <tr><td class="op">]</td><td>Match [ → Pop</td><td class="state">[ {, ( ]</td><td class="adv">✓</td></tr>
+          <tr><td class="op">)</td><td>Match ( → Pop</td><td class="state">[ { ]</td><td class="adv">✓</td></tr>
+          <tr><td class="op">}</td><td>Match { → Pop</td><td class="state">[ ]</td><td class="adv">✓</td></tr>
+          <tr><td colspan="2" style="color:var(--gold)">Stack empty → BALANCED</td><td class="state">[ ]</td><td class="adv">✓ TRUE</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="code-wrapper reveal">
+    <div class="code-header">
+      <div class="code-dots"><i></i><i></i><i></i></div>
+      <span>isBalanced — C++</span>
+    </div>
+    <pre><span class="type">bool</span> <span class="fn">isBalanced</span>(string expr) {
+  stack<span class="op-sym">&lt;</span><span class="type">char</span><span class="op-sym">&gt;</span> s;
+  <span class="kw">for</span> (<span class="type">char</span> ch : expr) {
+    <span class="kw">if</span> (ch <span class="op-sym">==</span> <span class="str">'('</span> <span class="op-sym">||</span> ch <span class="op-sym">==</span> <span class="str">'['</span> <span class="op-sym">||</span> ch <span class="op-sym">==</span> <span class="str">'{'</span>)
+      s.push(ch);
+    <span class="kw">else if</span> (ch <span class="op-sym">==</span> <span class="str">')'</span> <span class="op-sym">||</span> ch <span class="op-sym">==</span> <span class="str">']'</span> <span class="op-sym">||</span> ch <span class="op-sym">==</span> <span class="str">'}'</span>) {
+      <span class="kw">if</span> (s.empty()) <span class="kw">return</span> <span class="kw">false</span>;
+      <span class="kw">if</span> ((ch<span class="op-sym">==</span><span class="str">')'</span> <span class="op-sym">&amp;&amp;</span> s.top()<span class="op-sym">==</span><span class="str">'('</span>) <span class="op-sym">||</span>
+          (ch<span class="op-sym">==</span><span class="str">']'</span> <span class="op-sym">&amp;&amp;</span> s.top()<span class="op-sym">==</span><span class="str">'['</span>) <span class="op-sym">||</span>
+          (ch<span class="op-sym">==</span><span class="str">'}'</span> <span class="op-sym">&amp;&amp;</span> s.top()<span class="op-sym">==</span><span class="str">'{'</span>))
+        s.pop();
+      <span class="kw">else return</span> <span class="kw">false</span>;
+    }
+  }
+  <span class="kw">return</span> s.empty(); <span class="cmt">// empty = balanced</span>
+}</pre>
+  </div>
+</section>
+
+<hr class="gold-divider"><div class="ornament">✦ ✦ ✦</div><hr class="gold-divider">
+
+<!-- ══════════════ Q4 QUEUE THEORY ══════════════ -->
+<section id="q4" class="section">
+  <div class="section-header reveal">
+    <div class="section-num">04</div>
+    <div class="section-title-group">
+      <h2>Queue Theory</h2>
+      <p class="subtitle">FIFO · Circular Queue · Trade-offs</p>
+    </div>
+  </div>
+
+  <!-- Queue Visual -->
+  <div class="visual-block reveal">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.25em;color:var(--gold-dim);margin-bottom:0.5rem;text-transform:uppercase;">Queue State: [12, 8, 20]</p>
+    <div class="queue-visual">
+      <div style="text-align:center;">
+        <div class="queue-label">FRONT (dequeue)</div>
+        <div style="color:var(--gold);font-size:1.5rem;margin:0.25rem 0;">→</div>
+      </div>
+      <div class="queue-item">12</div>
+      <div class="queue-item">8</div>
+      <div class="queue-item">20</div>
+      <div style="text-align:center;">
+        <div style="color:var(--gold-dim);font-size:1.5rem;margin:0.25rem 0;">→</div>
+        <div class="queue-label">REAR (enqueue)</div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.85rem;color:var(--text-dim);font-style:italic;">First In, First Out — the first element added is the first to be removed</p>
+  </div>
+
+  <div class="theory-grid reveal">
+    <div class="theory-card">
+      <div class="theory-card-num">Q4.1 — Definition</div>
+      <h3>What is a Queue?</h3>
+      <p>Insertion at the <em>rear</em>, deletion at the <em>front</em>. FIFO principle. Real-world: bank queues, print job scheduling, CPU task scheduling.</p>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-num">Q4.2 — Operations</div>
+      <h3>Enqueue · Dequeue · Front</h3>
+      <p><strong style="color:var(--gold)">Enqueue</strong> inserts at rear. <strong style="color:var(--gold)">Dequeue</strong> removes from front. <strong style="color:var(--gold)">Front</strong> peeks without removing. All run in <em>O(1)</em> by directly accessing front/rear pointers.</p>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-num">Q4.3 — Circular Queue</div>
+      <h3>Why Circular?</h3>
+      <p>Last position wraps back to first using the <em>modulo operator</em>. Empty front slots left by dequeues can be reused, solving the "false full" problem of linear array queues.</p>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-num">Q4.4 — Implementation</div>
+      <h3>Array vs Linked List</h3>
+      <p>Array queues are fast but fixed-size and may report overflow when front slots are empty. Linked list queues grow dynamically and use memory only as needed, making them generally preferred.</p>
+    </div>
+  </div>
+
+  <!-- Q4.5 trace -->
+  <div class="reveal" style="margin-top:3rem;">
+    <h3 style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-style:italic;">Q4.5 — Queue Operation Trace</h3>
+    <table class="trace-table">
+      <thead>
+        <tr><th>#</th><th>Operation</th><th>Queue State</th><th>Return</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td class="op">enqueue(5)</td><td class="state">[5]</td><td>—</td></tr>
+        <tr><td>2</td><td class="op">enqueue(12)</td><td class="state">[5, 12]</td><td>—</td></tr>
+        <tr><td>3</td><td class="op">enqueue(8)</td><td class="state">[5, 12, 8]</td><td>—</td></tr>
+        <tr><td>4</td><td class="op">dequeue()</td><td class="state">[12, 8]</td><td class="ret">5</td></tr>
+        <tr><td>5</td><td class="op">front()</td><td class="state">[12, 8]</td><td class="ret">12</td></tr>
+        <tr><td>6</td><td class="op">enqueue(20)</td><td class="state">[12, 8, 20]</td><td>—</td></tr>
+        <tr><td>7</td><td class="op">dequeue()</td><td class="state">[8, 20]</td><td class="ret">12</td></tr>
+        <tr><td>8</td><td class="op">dequeue()</td><td class="state">[20]</td><td class="ret">8</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Circular Queue Visual -->
+  <div class="visual-block reveal" style="margin-top:3rem;">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.25em;color:var(--gold-dim);margin-bottom:1rem;text-transform:uppercase;">Circular Queue — 6 Slots</p>
+    <div style="display:flex;gap:3rem;flex-wrap:wrap;align-items:center;justify-content:center;">
+      <div class="circular-container">
+        <div class="circular-ring">
+          <div class="cq-cell" title="Index 0">0</div>
+          <div class="cq-cell" title="Index 1" style="border-color:rgba(201,168,76,0.6);color:var(--gold);">1</div>
+          <div class="cq-cell" title="Index 2" style="border-color:rgba(201,168,76,0.6);color:var(--gold);">2</div>
+          <div class="cq-cell" title="Index 3" style="border-color:rgba(201,168,76,0.6);color:var(--gold);">3</div>
+          <div class="cq-cell" title="Index 4" style="border-color:rgba(201,168,76,0.6);color:var(--gold);">4</div>
+          <div class="cq-cell" title="Index 5" style="border-color:rgba(201,168,76,0.6);color:var(--gold);">5</div>
+          <div class="cq-center">
+            <span class="cq-center-label">Circular<br>Queue</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--gold-dim);margin-top:0.5rem;">(rear+1)%6</span>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:300px;">
+        <ul class="algo-steps">
+          <li>Rear advances using <code style="color:var(--gold);font-family:'JetBrains Mono',monospace">(rear+1)%SIZE</code></li>
+          <li>Front advances using <code style="color:var(--gold);font-family:'JetBrains Mono',monospace">(front+1)%SIZE</code></li>
+          <li>Full when <code style="color:var(--gold);font-family:'JetBrains Mono',monospace">(rear+1)%SIZE == front</code></li>
+          <li>Empty when <code style="color:var(--gold);font-family:'JetBrains Mono',monospace">front == -1</code></li>
+          <li>Dequeued slots are reused — no wasted space</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-divider"><div class="ornament">✦ ✦ ✦</div><hr class="gold-divider">
+
+<!-- ══════════════ Q5 QUEUE IMPLEMENTATION ══════════════ -->
+<section id="q5" class="section">
+  <div class="section-header reveal">
+    <div class="section-num">05</div>
+    <div class="section-title-group">
+      <h2>Queue Implementation</h2>
+      <p class="subtitle">Linked List Queue &amp; Circular Array Queue in C++</p>
+    </div>
+  </div>
+
+  <div class="code-wrapper reveal">
+    <div class="code-header">
+      <div class="code-dots"><i></i><i></i><i></i></div>
+      <span>Linked List Queue — C++</span>
+    </div>
+    <pre><span class="kw">class</span> <span class="type">Queue</span> {
+  <span class="type">Node</span> <span class="op-sym">*</span>front, <span class="op-sym">*</span>rear;
+<span class="kw">public</span>:
+  Queue() { front <span class="op-sym">=</span> rear <span class="op-sym">=</span> <span class="kw">NULL</span>; }
+
+  <span class="type">void</span> <span class="fn">enqueue</span>(<span class="type">int</span> val) {
+    <span class="type">Node</span><span class="op-sym">*</span> n <span class="op-sym">=</span> <span class="kw">new</span> <span class="type">Node</span>(val);
+    <span class="kw">if</span> (<span class="fn">isEmpty</span>()) { front <span class="op-sym">=</span> rear <span class="op-sym">=</span> n; <span class="kw">return</span>; }
+    rear<span class="op-sym">-&gt;</span>next <span class="op-sym">=</span> n;
+    rear <span class="op-sym">=</span> n;          <span class="cmt">// advance rear</span>
+  }
+
+  <span class="type">int</span> <span class="fn">dequeue</span>() {
+    <span class="kw">if</span> (<span class="fn">isEmpty</span>()) <span class="kw">return</span> <span class="op-sym">-</span><span class="num">1</span>;
+    <span class="type">int</span> val <span class="op-sym">=</span> front<span class="op-sym">-&gt;</span>data;
+    <span class="type">Node</span><span class="op-sym">*</span> tmp <span class="op-sym">=</span> front;
+    front <span class="op-sym">=</span> front<span class="op-sym">-&gt;</span>next;  <span class="cmt">// advance front</span>
+    <span class="kw">delete</span> tmp;
+    <span class="kw">return</span> val;
+  }
+};</pre>
+  </div>
+
+  <div class="code-wrapper reveal">
+    <div class="code-header">
+      <div class="code-dots"><i></i><i></i><i></i></div>
+      <span>Circular Array Queue — C++</span>
+    </div>
+    <pre><span class="kw">class</span> <span class="type">CircularQueue</span> {
+  <span class="type">int</span> arr[<span class="num">6</span>], front, rear;
+<span class="kw">public</span>:
+  CircularQueue() { front <span class="op-sym">=</span> rear <span class="op-sym">=</span> <span class="op-sym">-</span><span class="num">1</span>; }
+
+  <span class="type">bool</span> <span class="fn">isFull</span>()  { <span class="kw">return</span> (rear<span class="op-sym">+</span><span class="num">1</span>)<span class="op-sym">%</span><span class="num">6</span> <span class="op-sym">==</span> front; }
+  <span class="type">bool</span> <span class="fn">isEmpty</span>() { <span class="kw">return</span> front <span class="op-sym">==</span> <span class="op-sym">-</span><span class="num">1</span>; }
+
+  <span class="type">void</span> <span class="fn">enqueue</span>(<span class="type">int</span> val) {
+    <span class="kw">if</span> (<span class="fn">isFull</span>()) { cout <span class="op-sym">&lt;&lt;</span> <span class="str">"Overflow"</span>; <span class="kw">return</span>; }
+    <span class="kw">if</span> (<span class="fn">isEmpty</span>()) front <span class="op-sym">=</span> rear <span class="op-sym">=</span> <span class="num">0</span>;
+    <span class="kw">else</span> rear <span class="op-sym">=</span> (rear<span class="op-sym">+</span><span class="num">1</span>)<span class="op-sym">%</span><span class="num">6</span>;   <span class="cmt">// wrap around</span>
+    arr[rear] <span class="op-sym">=</span> val;
+  }
+
+  <span class="type">void</span> <span class="fn">dequeue</span>() {
+    <span class="kw">if</span> (front <span class="op-sym">==</span> rear) front <span class="op-sym">=</span> rear <span class="op-sym">=</span> <span class="op-sym">-</span><span class="num">1</span>;
+    <span class="kw">else</span> front <span class="op-sym">=</span> (front<span class="op-sym">+</span><span class="num">1</span>)<span class="op-sym">%</span><span class="num">6</span>; <span class="cmt">// wrap around</span>
+  }
+};</pre>
+  </div>
+</section>
+
+<hr class="gold-divider"><div class="ornament">✦ ✦ ✦</div><hr class="gold-divider">
+
+<!-- ══════════════ Q6 POSTFIX ══════════════ -->
+<section id="q6" class="section">
+  <div class="section-header reveal">
+    <div class="section-num">06</div>
+    <div class="section-title-group">
+      <h2>Evaluate Postfix Expression</h2>
+      <p class="subtitle">Stack Application · Expression Parsing</p>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <strong>Algorithm:</strong> Scan left to right. If digit → push. If operator → pop two operands (val1, val2), compute <code style="color:var(--gold)">val1 OP val2</code>, push result. The final stack element is the answer.
+  </div>
+
+  <div class="reveal" style="margin-top:2rem;">
+    <h3 style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-style:italic;">Trace: "53*2+" → Expected: 17</h3>
+    <div class="postfix-steps">
+      <div class="postfix-step">
+        <div class="pf-token">5</div>
+        <div class="pf-action">Digit → Push</div>
+        <div class="pf-stack">Stack: [5]</div>
+      </div>
+      <div class="postfix-step">
+        <div class="pf-token">3</div>
+        <div class="pf-action">Digit → Push</div>
+        <div class="pf-stack">Stack: [5, 3]</div>
+      </div>
+      <div class="postfix-step">
+        <div class="pf-token" style="color:var(--crimson-bright);">*</div>
+        <div class="pf-action">Pop 3, Pop 5<br>5 * 3 = 15</div>
+        <div class="pf-stack">Stack: [15]</div>
+      </div>
+      <div class="postfix-step">
+        <div class="pf-token">2</div>
+        <div class="pf-action">Digit → Push</div>
+        <div class="pf-stack">Stack: [15, 2]</div>
+      </div>
+      <div class="postfix-step">
+        <div class="pf-token" style="color:var(--crimson-bright);">+</div>
+        <div class="pf-action">Pop 2, Pop 15<br>15 + 2 = 17</div>
+        <div class="pf-stack">Stack: [17]</div>
+      </div>
+      <div class="postfix-step" style="background:rgba(201,168,76,0.08);">
+        <div class="pf-token" style="color:#66bb6a;">17</div>
+        <div class="pf-action">Return top</div>
+        <div class="pf-stack" style="color:#66bb6a;border-color:rgba(102,187,106,0.3);">Answer ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrapper reveal" style="margin-top:2rem;">
+    <div class="code-header">
+      <div class="code-dots"><i></i><i></i><i></i></div>
+      <span>evaluatePostfix — C++</span>
+    </div>
+    <pre><span class="type">int</span> <span class="fn">evaluatePostfix</span>(string expr) {
+  stack<span class="op-sym">&lt;</span><span class="type">int</span><span class="op-sym">&gt;</span> s;
+  <span class="kw">for</span> (<span class="type">char</span> ch : expr) {
+    <span class="kw">if</span> (isdigit(ch)) {
+      s.push(ch <span class="op-sym">-</span> <span class="str">'0'</span>);   <span class="cmt">// char to int</span>
+    } <span class="kw">else</span> {
+      <span class="type">int</span> val2 <span class="op-sym">=</span> s.top(); s.pop();
+      <span class="type">int</span> val1 <span class="op-sym">=</span> s.top(); s.pop();
+      <span class="kw">switch</span>(ch) {
+        <span class="kw">case</span> <span class="str">'+'</span>: s.push(val1 <span class="op-sym">+</span> val2); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="str">'-'</span>: s.push(val1 <span class="op-sym">-</span> val2); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="str">'*'</span>: s.push(val1 <span class="op-sym">*</span> val2); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="str">'/'</span>: s.push(val1 <span class="op-sym">/</span> val2); <span class="kw">break</span>;
+      }
+    }
+  }
+  <span class="kw">return</span> s.top();
+}</pre>
+  </div>
+
+  <div class="reveal">
+    <h3 style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-style:italic;">Test Cases</h3>
+    <table class="trace-table">
+      <thead>
+        <tr><th>Expression</th><th>Equivalent Infix</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="op">"23+"</td><td>2 + 3</td><td class="ret">5</td></tr>
+        <tr><td class="op">"53*2+"</td><td>(5 × 3) + 2</td><td class="ret">17</td></tr>
+        <tr><td class="op">"842-*"</td><td>8 × (4 − 2)</td><td class="ret">16</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="gold-divider">
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-logo">Saim Sajjad</div>
+  <p class="footer-meta" style="margin-bottom:1rem;">s2025376095 · DSA Assignment III · Stacks &amp; Queues</p>
+  <a href="https://github.com/YourUsername/DSA-Assignments" class="footer-meta" style="display:inline-block;border:1px solid rgba(201,168,76,0.3);padding:0.4rem 1rem;color:var(--gold-dim);transition:all 0.2s;">
+    ⌥ View on GitHub
+  </a>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
